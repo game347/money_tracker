@@ -1,12 +1,14 @@
-import { Client } from 'pg';
+import pg from 'pg';
 
-const client = new Client({
-    host: 'localhost',
-    user: 'postgres',
-    port: 5432,
-    password: 'game0863456374', // 👈 change this
-    database: 'postgres'
+const { Pool } = pg;
+
+const pool = new Pool({
+  user: 'myuser',
+  host: '192.168.0.113',
+  database: 'mydb',
+  password: '0863456374',
+  port: 5432,
 });
 
-client.connect();
-export default client;
+export default pool; // ✅ export as default for ESM
+

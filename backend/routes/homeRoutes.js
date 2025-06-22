@@ -1,8 +1,9 @@
 import express from 'express';
-import { getHome } from '../controllers/homeController.js';
+import { getBalance, addBalance } from '../controllers/homeController.js'; // ✅ changed
 
 const router = express.Router();
 
-router.get('/', getHome); // GET http://localhost:5000/
+router.get('/', getBalance);
+router.post('/', addBalance);
 
 export default router;

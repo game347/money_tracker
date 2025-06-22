@@ -1,10 +1,11 @@
 import client from '../db.js';
 
-export const getBalance = async (req, res) => {
+export const getTotalBalance = async (req, res) => {
     try {
-        const result = await client.query('SELECT * FROM transactions_weekly'); // change if needed
-        res.json(result.rows);
+        const result = await client.query('SELECT SUM(amount) AS total FROM transactions_weekly');
+        const total = result.rows[0].total || 0;
+        res.json({ total });
     } catch (err) {
-        res.status(500).send('Database error: ' + err.message);
+        res.status(500).send('Error fetching total balance: ' + err.message);
     }
 };
