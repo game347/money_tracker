@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BottomNavigation } from "../components/BottomNavigation";
 
 const Index = () => {
@@ -8,6 +8,20 @@ const Index = () => {
   const [currentTransactionType, setCurrentTransactionType] = useState(null);
   const [transactionNote, setTransactionNote] = useState('');
   const [transactions, setTransactions] = useState([]);
+
+  // ✅ Fetch initial balance from backend
+  useEffect(() => {
+    fetch('http://localhost:5000/balance/total')
+      .then(res => res.json())
+      .then(data => {
+        if (typeof data.total === 'number') {
+          setBalance(data.total);
+        }
+      })
+      .catch(err => {
+        console.error('❌ Failed to fetch balance:', err);
+      });
+  }, []);
 
   const initiateTransaction = (type) => {
     setCurrentTransactionType(type);
@@ -31,12 +45,12 @@ const Index = () => {
 
   const confirmTransaction = () => {
     let amount = parseFloat(keypadAmount);
-
+  
     if (isNaN(amount) || amount <= 0) {
       alert("Please enter a valid positive number.");
       return;
     }
-
+  
     if (currentTransactionType === 'withdraw') {
       amount = -amount;
       if (balance + amount < 0) {
@@ -44,25 +58,36 @@ const Index = () => {
         return;
       }
     }
-
-    setBalance(prev => prev + amount);
-
-    setTransactions(prev => [
-      {
-        id: Date.now(),
-        type: currentTransactionType,
-        amount: Math.abs(amount),
-        note: transactionNote.trim(),
-        date: new Date().toLocaleString(),
+  
+    // ✅ Send transaction to backend
+    fetch('http://localhost:5000/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      ...prev,
-    ]);
-
-    setShowKeypad(false);
-    setKeypadAmount('');
-    setTransactionNote('');
-    setCurrentTransactionType(null);
+      body: JSON.stringify({
+        amount,
+        note: transactionNote.trim(),
+        date: new Date().toISOString(),
+      }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to save transaction.');
+        return res.text();
+      })
+      .then(msg => {
+        console.log('✅ Backend:', msg);
+  
+        setShowKeypad(false);
+        setKeypadAmount('');
+        setTransactionNote('');
+        setCurrentTransactionType(null);
+      })
+      .catch(err => {
+        console.error('❌ Backend error:', err.message);
+      });
   };
+  
 
   const cancelKeypad = () => {
     setShowKeypad(false);
@@ -179,7 +204,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Recent Activity */}
+        {/* Recent Activity (Optional - still using local state) */}
         <div className="mt-12">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h2>
