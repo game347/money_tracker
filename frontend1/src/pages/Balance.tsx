@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BottomNavigation } from "../components/BottomNavigation";
 
 const Balance = () => {
   const [balance, setBalance] = useState(null);
 
-  useEffect(() => {
-    fetch('http://localhost:5000/balance/total')
-      .then(res => res.json())
-      .then(data => {
-        if (typeof data.total === 'number') {
-          setBalance(data.total);
-        }
+    useEffect(() => {
+      fetch('http://localhost:5000/balance/total', {
+        method: 'GET', // ✅ explicitly specify GET method
       })
-      .catch(err => {
-        console.error('❌ Failed to fetch balance:', err);
-      });
-  }, []);
+        .then(res => res.json())
+        .then(data => {
+          if (typeof data.total === 'number') {
+            setBalance(data.total);
+          }
+        })
+        .catch(err => {
+          console.error('❌ Failed to fetch balance:', err);
+        });
+    }, []);
+  
 
   return (
     <div className="min-h-screen w-screen bg-white flex items-center justify-center">
